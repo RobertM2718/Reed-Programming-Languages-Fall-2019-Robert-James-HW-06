@@ -2,3 +2,8 @@
 
 To do:
   1. fill out the rest of the to-do list
+
+parser
+reducer
+glue???
+tests
