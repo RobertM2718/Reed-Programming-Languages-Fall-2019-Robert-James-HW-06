@@ -3,14 +3,14 @@
 To do:
   1. fill out the rest of the to-do list
 
-parser
-  tokenizer (?)
+test parser
+  1. get tokenizer and fold into parser
 
 reducer
   1. substituter
+      -> variable maker: reducer carries # of vars made as an input
   2. free-variable checker
-  3. variable maker
 
-glue???
+glue
 
-tests
+write tests
