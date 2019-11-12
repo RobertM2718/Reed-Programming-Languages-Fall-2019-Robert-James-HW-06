@@ -7,9 +7,9 @@ parser
   tokenizer (?)
 
 reducer
-  substituter
-  free-variable checker
-  variable maker
+  1. substituter
+  2. free-variable checker
+  3. variable maker
 
 glue???
 
