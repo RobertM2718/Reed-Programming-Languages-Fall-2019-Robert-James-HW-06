@@ -10,7 +10,13 @@ reducer
   1. substituter
       -> variable maker: reducer carries # of vars made as an input
   2. free-variable checker
+  3. redux finder
 
 glue
 
 write tests
+
+
+
+
+extensions!

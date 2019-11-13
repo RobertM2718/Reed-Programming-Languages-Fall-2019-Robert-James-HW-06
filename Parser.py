@@ -83,21 +83,20 @@ def parseExpn(stream):
     else:
         return parsePreJuxt(stream)
 
-def parsePreJuxt(stream):
+def parsePreJuxt(stream): 
     #
-    # <pJuxt> := <t> fn x => <expn> | <juxt>
+    # <pJuxt> := <juxt> fn x => <expn> | <juxt>
     #
-    t = parseTerminal(stream)
+    j = parseJuxt(stream)
     if stream.next() == "fn":
-        e = parseExpn(stream)
-        return ["App", t, e]
-    else:
-        return parseJuxt(stream, t)
+        return ["App", j, parseExpn(stream)]
+    return j
 
-def parseJuxt(stream, e):
+def parseJuxt(stream):
     #
     # <juxt> := <juxt> <t> | <t>
     #
+    e = parseTerminal(stream)
     while not stream.next() in stoppers:
         t = parseTerminal(stream)
         e = ["App", e, t]
@@ -115,10 +114,22 @@ def parseTerminal(stream):
     else:
         return stream.eatName()
     
-stoppers = {';', ')'}
+stoppers = {';', ')', 'fn'}
             
 s = testTokenStream(["fn", "x", "=>", "(", "fn", "y", "=>", "y", "x", ")", "x", ";"])
 
 print (s.l)
 print (parseExpn(s))
 print (s.l)
+
+s2 = testTokenStream(["a", "b", "fn", "x", "=>", "x", ";"])
+
+print (s2.l)
+print (parseExpn(s2))
+print (s2.l)
+
+s3 = testTokenStream(["a", "b", "c", "fn", "x", "=>", "fn", "y", "=>", "x", "y", ";"])
+
+print (s3.l)
+print (parseExpn(s3))
+print (s3.l)
