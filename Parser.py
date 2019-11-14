@@ -3,6 +3,27 @@
 #import tokenizer
 
 
+"""
+<file>  := <line> ; <file> | <>
+
+<line>  := clear <name> 
+         | add <name> from <name> 
+         | <name> := <expn>
+        
+<expn>  := fn <name> => <expn>
+         | <pJuxt>
+    
+<pJuxt> := <juxt> fn <name> => <expn>
+         | <juxt>
+         
+<juxt>  := <t> <juxt> | <t>
+
+<t>     := <name> | (<expn>)
+
+<name>  := x | y | fact . . .
+"""
+
+
 class testTokenStream:
     
     reserved = {"fn", "=>", ";", ":=", "(", ")"}
