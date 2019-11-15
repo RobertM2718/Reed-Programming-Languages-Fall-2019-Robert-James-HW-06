@@ -20,17 +20,17 @@ false := fn x => fn y => y;
 
 not := fn b => b false true;
 
-fst := true;
+fst := fn p => p true;
 
-snd := false;
+snd := fn p => p false;
 
 pair := fn x => fn y => fn z => z x y;
 
-delay := fn op => fn p => pair true ((p fst) (op (p snd)) (p snd));
+delay := fn op => fn p => pair true ((fst p) (op (snd p)) (snd p));
 
 delayCount := delay succ;
 
-pred := fn n => (n delayCount (pair false zero)) snd;
+pred := fn n => snd (n delayCount (pair false zero));
 
 minus := fn n => fn m => m pred n;
 
@@ -42,9 +42,9 @@ less := fn n => fn m => and (equalZero (minus n m)) (not (equalZero (minus m n))
 
 equal := fn n => fn m => and (not (less n m)) (not (less m n));
 
-fibExtract := fn p => p snd;
+fibExtract := fn p => snd p;
 
-fibIterator := fn p => pair (p snd) (plus (p fst) (p snd));
+fibIterator := fn p => pair (snd p) (plus (fst p) (snd p));
 
 fibStart := pair zero one;
 
@@ -63,5 +63,5 @@ fibYTemplate := fn f => fn n => (equalZero n) one
 
 fibY := Y_Comb fibYTemplate;
 
-main := fibY (two (pow two) two);
+main := fibB three;
 
