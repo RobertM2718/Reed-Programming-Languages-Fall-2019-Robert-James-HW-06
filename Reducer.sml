@@ -13,6 +13,7 @@ fun prettyString (Lam (s, t)) ks    = let val space = (ks^"   | ") in let val le
 
 fun ppTerm t = print (prettyString t "")
 
+
 local 
   val count = ref ~1
   
@@ -45,8 +46,64 @@ local
 
     fun union nil ls = ls
       | union (y::ys) ls = (union ys (pushdown y ls))
+
+    fun contains nil y = false
+      | contains (l::ls) y = if y = l then true else contains ls y
 in
     fun freeVar (Name (s)) = s::nil
       | freeVar (Lam (s,t)) = (setminus (freeVar t) s)
       | freeVar (Juxt (t1, t2)) = (union (freeVar t1) (freeVar t2))
+
+    fun subst s x (Name (v)) = if v = x then s else (Name (v))
+      | subst s x (Lam (v, t)) = if v = x then Lam (v, t)
+                            else if contains (freeVar s) v then let val vp = newVar v
+                                                                in (subst s x (Lam (vp, (subst (Name vp) v t)))) end
+                            else Lam (v, (subst s x t))
+      | subst s x (Juxt (t1, t2)) = Juxt ((subst s x t1), (subst s x t2))
+
+
+    datatype reduxOption = SOME of Term
+                         | NONE
+
+
+    fun findBetaRedux (Name s) = NONE
+      | findBetaRedux (Lam (v, t)) = findBetaRedux t
+      | findBetaRedux (Juxt (Lam (v, t1), t2)) = SOME (Juxt (Lam (v, t1), t2))
+      | findBetaRedux (Juxt (t1, t2)) = case (findBetaRedux t1) of SOME t => SOME t
+                                                                 | NONE   => findBetaRedux t2
+
+    fun reduceStep t = case t of Name s => NONE
+                               | Lam (v, t) => (case reduceStep t of NONE   => NONE
+                                                                   | SOME p => SOME (Lam (v, p)))
+                               | Juxt (Lam (v, t1), t2) => SOME (subst t2 v t1)
+                               | Juxt (t1, t2) => (case reduceStep t1 of SOME p => SOME (Juxt (p, t2))
+                                                                       | NONE   => (case reduceStep t2 of SOME p2 => SOME (Juxt (t1, p2))
+                                                                                                        | NONE    => NONE))
+
+    fun reduce t = case reduceStep t of NONE   => t
+                                      | SOME p => reduce p
+
+    fun ppReduce t = (print "\n ########## \n"; ppTerm t; case reduceStep t of NONE   => (print "\n ########## \n"; t)
+                                                                             | SOME p => ppReduce p)
+
+    fun bddReduce t n = if n < 1 then t else case reduceStep t of NONE => t
+                                                                | SOME p => bddReduce p (n-1)
 end
+
+val ttest = (Juxt (Lam ("y", (Name "y")), Name "x"))
+
+val fv1 = freeVar ttest
+
+val s1 = subst (Name "z") "y" ttest
+
+val s2 = subst (Name "z") "x" ttest
+
+val r1 = findBetaRedux ttest
+
+val rs1 = reduceStep ttest
+
+val rr1 = reduce ttest
+
+val pp1 = ppReduce ttest
+
+val bdd1 = bddReduce ttest 5
