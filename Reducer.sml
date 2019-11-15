@@ -5,6 +5,14 @@ datatype
   | Name of string
 
 
+fun prettyString (Lam (s, t)) ks    = let val space = (ks^"   | ") in let val lev = (ks^"   +-") in
+                                      "Lam+-"^s^"\n"^space^"\n"^lev^(prettyString t (ks^"     ")) end end
+  | prettyString (Juxt (t1, t2)) ks = let val space = (ks^"   | ") in let val lev = (ks^"   +-") in
+                                      "App+-"^(prettyString t1 space)^"\n"^space^"\n"^lev^(prettyString t2 (ks^"     ")) end end
+  | prettyString (Name s) ks        = "Var "^s
+
+fun ppTerm t = print (prettyString t "")
+
 local 
   val count = ref ~1
   
