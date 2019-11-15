@@ -1,0 +1,37 @@
+zero := fn f => fn a => a;
+
+succ := fn n => fn f => fn a => f (n f a);
+
+one := succ zero;
+
+two := succ one;
+
+three := succ two;
+
+plus := fn n => fn m => n succ m;
+
+true := fn x => fn y => x;
+
+false := fn x => fn y => y;
+
+fst := fn p => p true;
+
+snd := fn p => p false;
+
+pair := fn x => fn y => fn z => z x y;
+
+delay := fn op => fn p => pair true ((fst p) (op (snd p)) (snd p));
+
+delayCount := delay succ;
+
+pred := fn n => snd (n delayCount (pair false zero));
+
+fibExtract := fn p => snd p;
+
+fibIterator := fn p => pair (snd p) (plus (fst p) (snd p));
+
+fibStart := pair zero one;
+
+fibB := fn n => (fibExtract ((pred n) fibIterator fibStart));
+
+main := fibB three;

@@ -4,7 +4,9 @@ datatype
   | Juxt of Term   * Term
   | Name of string
 
-
+(*
+Various printing functions.
+*)
 fun prettyString (Lam (s, t)) ks    = let val space = (ks^"   | ") in let val lev = (ks^"   +-") in
                                       "Lam+-"^s^"\n"^space^"\n"^lev^(prettyString t (ks^"     ")) end end
   | prettyString (Juxt (t1, t2)) ks = let val space = (ks^"   | ") in let val lev = (ks^"   +-") in
@@ -19,30 +21,25 @@ fun uString (Lam (s, t))    = "Lam ("^s^", "^(uString t)^")"
 
 fun upTerm t = print (uString t)
 
-local 
-  val count = ref ~1
-  
-  fun isNumChar c = String.isSubstring (String.str c) ("0123456789")
-  
-  fun stripID nil = nil
-    | stripID (#"_"::(x::xs)) = if (isNumChar x) then nil
-                                    else #"_"::(stripID (x::xs))
-    | stripID (x :: xs) = x :: (stripID xs)
-  
-in
-  fun newVar var = (count := !count + 1;
-        (implode (stripID (explode var)))^"_"^(Int.toString (!count)))
-end
 
-(*
-fun reduce
-
-and subst
-  
-and freeVar
-
-*)
 local
+(*
+Helper functions for the reducers
+*)
+    val count = ref ~1
+    
+    fun isNumChar c = String.isSubstring (String.str c) ("0123456789")
+    
+    fun stripID nil = nil
+      | stripID (#"_"::(x::xs)) = if (isNumChar x) then nil
+                                      else #"_"::(stripID (x::xs))
+      | stripID (x :: xs) = x :: (stripID xs)
+(*
+Produces a fresh variable from the base of an older one, assumes any _(digit) occurs after the end of the base, if at all.
+*)
+    fun newVar var = (count := !count + 1;
+          (implode (stripID (explode var)))^"_"^(Int.toString (!count)))
+
     fun setminus nil y = nil
       | setminus (l::ls) y = if (y = l) then (setminus ls y) else (l :: (setminus ls y))
 
@@ -54,7 +51,7 @@ local
 
     fun contains nil y = false
       | contains (l::ls) y = if y = l then true else contains ls y
-in
+
     fun freeVar (Name (s)) = s::nil
       | freeVar (Lam (s,t)) = (setminus (freeVar t) s)
       | freeVar (Juxt (t1, t2)) = (union (freeVar t1) (freeVar t2))
@@ -84,7 +81,10 @@ in
                                | Juxt (t1, t2) => (case reduceStep t1 of SOME p => SOME (Juxt (p, t2))
                                                                        | NONE   => (case reduceStep t2 of SOME p2 => SOME (Juxt (t1, p2))
                                                                                                         | NONE    => NONE))
-
+in
+(*
+Normal-order reducers for Terms, they all use the same basic structure and differ in how they print, except for bddReduce which is limited to n steps of reduction.
+*)
     fun reduce t = case reduceStep t of NONE   => t
                                       | SOME p => reduce p
 

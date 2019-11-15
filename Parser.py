@@ -1,51 +1,11 @@
 #Parser
 
-#import tokenizer
-
-
-"""
-<file>  := <line> ; <file> | <>
-
-<line>  := clear <name> 
-         | add <name> from <name> 
-         | <name> := <expn>
-        
-<expn>  := fn <name> => <expn>
-         | <pJuxt>
-    
-<pJuxt> := <juxt> fn <name> => <expn>
-         | <juxt>
-         
-<juxt>  := <t> <juxt> | <t>
-
-<t>     := <name> | (<expn>)
-
-<name>  := x | y | fact . . .
-"""
-
-
-#class testTokenStream:
-#    
-#    reserved = {"fn", "=>", ";", ":=", "(", ")"}
-#    
-#    def __init__(self, l):
-#        self.l = l
-#    def next(self):
-#        return self.l[0]
-#    def eatName(self):
-#        if self.next() not in self.reserved:
-#            return self.l.pop(0)
-#        else:
-#            raise firstError
-#    def eat(self, tk):
-#        if self.next() == tk:
-#            return self.l.pop(0)
-#        else:
-#            raise secondError
-
-# tokenStream object; behaves like the stream from the first homework
+# uses a tokenStream class taken from an earlier homework, with slight edits to work with our .lc files.
 
 def parseFile(fileName):
+    """
+    Reads a .lc file and returns a list of (name, value) binding tuples.
+    """
     bindings = []
     with open(fileName, 'r') as f:
         stream = TokenStream(f.read(), fileName)
@@ -62,35 +22,16 @@ def parseFile(fileName):
     bindings.append(("main", expn))
     stream.checkEOF()
     return bindings
-#
-#def parseExpn(stream):
-#    return parseLam(stream)
-#
-#def parseLam(stream):
-#    if stream.next() == "fn":
-#        stream.eat("fn")
-#        n = stream.eatName()
-#        stream.eat("=>")
-#        l = parseLam(stream)
-#        return ["Lam", n, l]
-#    else:
-#        return parseJuxt(stream)
-#    
-#def parseJuxt(stream):
-#    
-#    elif stream.next() == "(":
-#        stream.eat("(")
-#        expn = parseExpn(stream)
-#        stream.eat(")")
-#        return expn
-#    else:
-#        e = parseExpn()
-#        while :
-#            get_juxt_terms_left_associative
-#        return all of those
-#        
-#
 
+def parseLine(s):
+    """
+    Parses a single line of terminal input
+    """
+    stream = TokenStream(s, "terminal input")
+    name = stream.eatName()
+    stream.eat(":=")
+    expn = parseExpn(stream)
+    return (name, expn)
 
 def parseExpn(stream):
     #
@@ -137,30 +78,10 @@ def parseTerminal(stream):
         return ["Var", stream.eatName()]
     
 stoppers = {';', ')', 'fn'}
-#            
-#s = testTokenStream(["fn", "x", "=>", "(", "fn", "y", "=>", "y", "x", ")", "x", ";"])
-#
-#print (s.l)
-#print (parseExpn(s))
-#print (s.l)
-#
-#s2 = testTokenStream(["a", "b", "fn", "x", "=>", "x", ";"])
-#
-#print (s2.l)
-#print (parseExpn(s2))
-#print (s2.l)
-#
-#s3 = testTokenStream(["a", "b", "c", "fn", "x", "=>", "fn", "y", "=>", "x", "y", ";"])
-#
-#print (s3.l)
-#print (parseExpn(s3))
-#print (s3.l)
-
     
 """
 This code is mostly from Jim's parser
 """
-
 
 RESERVED = {'fn', '=>', ':=', '(', ')', ';', 'eof'}
 
@@ -168,7 +89,6 @@ RESERVED = {'fn', '=>', ':=', '(', ')', ';', 'eof'}
 DELIMITERS = '();'
 
 OPERATORS = {':', '=', '>'}
-
 
 #
 # LEXICAL ANALYSIS / TOKENIZER
@@ -414,3 +334,7 @@ class TokenStream:
                 self.chompOperator()
             else:
                 self.chompWord()
+
+"""
+End adapted tokenizer code.
+"""
