@@ -1,0 +1,7 @@
+true  := fn x => fn y => x;
+
+false := fn x => fn y => y;
+
+not   := fn x => x false true;
+
+main  := (not true);

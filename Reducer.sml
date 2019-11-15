@@ -13,6 +13,11 @@ fun prettyString (Lam (s, t)) ks    = let val space = (ks^"   | ") in let val le
 
 fun ppTerm t = print (prettyString t "")
 
+fun uString (Lam (s, t))    = "Lam ("^s^", "^(uString t)^")"
+  | uString (Juxt (t1, t2)) = "App ("^(uString t1)^", "^(uString t2)^")"
+  | uString (Name s)        = "(Var "^s^")"
+
+fun upTerm t = print (uString t)
 
 local 
   val count = ref ~1
@@ -85,25 +90,9 @@ in
 
     fun ppReduce t = (print "\n ########## \n"; ppTerm t; case reduceStep t of NONE   => (print "\n ########## \n"; t)
                                                                              | SOME p => ppReduce p)
+    fun upReduce t = (print "\n ########## \n"; upTerm t; case reduceStep t of NONE   => (print "\n ########## \n"; t)
+                                                                             | SOME p => upReduce p)
 
     fun bddReduce t n = if n < 1 then t else case reduceStep t of NONE => t
                                                                 | SOME p => bddReduce p (n-1)
 end
-
-val ttest = (Juxt (Lam ("y", (Name "y")), Name "x"))
-
-val fv1 = freeVar ttest
-
-val s1 = subst (Name "z") "y" ttest
-
-val s2 = subst (Name "z") "x" ttest
-
-val r1 = findBetaRedux ttest
-
-val rs1 = reduceStep ttest
-
-val rr1 = reduce ttest
-
-val pp1 = ppReduce ttest
-
-val bdd1 = bddReduce ttest 5

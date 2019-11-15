@@ -1,0 +1,67 @@
+zero := fn f => fn a => a;
+
+succ := fn n => fn f => fn a => f (n f a);
+
+one := succ zero;
+
+two := succ one;
+
+three := succ two;
+
+plus := fn n => fn m => n succ m;
+
+mult := fn n => fn m => (n (plus m) zero); 
+
+pow := fn n => fn m => m (mult n) one;
+
+true := fn x => fn y => x;
+
+false := fn x => fn y => y;
+
+not := fn b => b false true;
+
+fst := true;
+
+snd := false;
+
+pair := fn x => fn y => fn z => z x y;
+
+delay := fn op => fn p => pair true ((p fst) (op (p snd)) (p snd));
+
+delayCount := delay succ;
+
+pred := fn n => (n delayCount (pair false zero)) snd;
+
+minus := fn n => fn m => m pred n;
+
+and := fn x => fn y => x (y true false) false;
+
+equalZero := fn n => n (fn x => false) true;
+
+less := fn n => fn m => and (equalZero (minus n m)) (not (equalZero (minus m n)));
+
+equal := fn n => fn m => and (not (less n m)) (not (less m n));
+
+fibExtract := fn p => p snd;
+
+fibIterator := fn p => pair (p snd) (plus (p fst) (p snd));
+
+fibStart := pair zero one;
+
+fibB := fn n => (fibExtract (n fibIterator fibStart));
+
+Y_Comb := fn g => (fn z => (z z)) (fn x => g (x x));
+
+(*
+  Both of these fib functions are zero-indexed.  So, fib 0 = 1, fib 1 = 1,
+  fib 2 = 2, fib 3 = 3, fib 5 = 8, etc
+*)
+
+fibYTemplate := fn f => fn n => (equalZero n) one 
+                                    ((equalZero (pred n)) one 
+                                        (plus (f (pred n)) ( f (two pred n))));
+
+fibY := Y_Comb fibYTemplate;
+
+main := fibY (two (pow two) two);
+
