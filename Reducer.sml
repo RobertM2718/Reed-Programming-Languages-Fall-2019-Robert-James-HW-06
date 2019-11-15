@@ -28,3 +28,17 @@ and subst
 and freeVar
 
 *)
+local
+    fun setminus nil y = nil
+      | setminus (l::ls) y = if (y = l) then (setminus ls y) else (l :: (setminus ls y))
+
+    fun pushdown y nil = (y :: nil)
+      | pushdown y (l::ls) = if (y = l) then (y :: ls) else (l :: (pushdown y ls))
+
+    fun union nil ls = ls
+      | union (y::ys) ls = (union ys (pushdown y ls))
+in
+    fun freeVar (Name (s)) = s::nil
+      | freeVar (Lam (s,t)) = (setminus (freeVar t) s)
+      | freeVar (Juxt (t1, t2)) = (union (freeVar t1) (freeVar t2))
+end
